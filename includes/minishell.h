@@ -6,4 +6,11 @@
 # include <sys/wait.h>
 # include <signal.h>
 # include "../libft/libft.h"
+
+typedef struct      s_token {
+    char            *data;
+    int             type;
+    struct s_token  *next;
+}                   token;
+
 #endif
