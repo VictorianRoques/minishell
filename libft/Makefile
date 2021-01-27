@@ -10,7 +10,7 @@ ft_split.c ft_strchr.c ft_strdup.c ft_strjoin.c ft_strlcat.c ft_strlcpy.c \
 ft_strlen.c ft_strmapi.c ft_strncmp.c ft_strnstr.c ft_strrchr.c ft_strtrim.c \
 ft_tolower.c ft_toupper.c ft_substr.c ft_lstadd_front.c ft_lstadd_back.c \
 ft_lstclear.c ft_lstdelone.c ft_lstiter.c ft_lstlast.c ft_lstmap.c \
-ft_lstnew.c ft_lstsize.c
+ft_lstnew.c ft_lstsize.c get_next_line.c
 
 OBJS = ${SRCS:.c=.o}
 
@@ -25,7 +25,7 @@ $(NAME): ${OBJS}
 	@ar rcs $(NAME) $(OBJS)
 
 clean:
-	@rm -rf $(OBJS) $(OBJS_BONUS)
+	@rm -rf $(OBJS)
 
 fclean: clean
 	@rm -rf $(NAME)
