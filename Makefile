@@ -1,7 +1,7 @@
 NAME = minishell
 CC = clang
-SRC = srcs/main.c
-CFLAGS = -Wall -Wextra -Werror
+SRC = srcs/main.c srcs/lexer.c
+CFLAGS = -g3
 OBJ = $(SRC:.c=.o)
 
 %.o: %.c
@@ -11,7 +11,7 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 		make -C libft
-		$(CC) $(CFLAGS) -o $(NAME) $(OBJ) libft/libft.a
+		$(CC) $(CFLAGS) -g3 -o $(NAME) $(OBJ) libft/libft.a
 
 deubg: CFLAGS += -g3
 debug: re
