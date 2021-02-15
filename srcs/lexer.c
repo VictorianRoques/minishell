@@ -1,17 +1,18 @@
 #include "../includes/minishell.h"
-#include "../includes/lexer.h"
 
-static int         generate_cmd_token(char *str, t_lexer *lexer)
+static int         word_token(char *str, t_lexer *lexer)
 {
-    int i = 0;
+    int i;
     t_list *lst;
     t_token *tok;
+    char *string;
 
-    while(ft_isalpha(str[i]))
-        i++;
-    char *string = malloc(sizeof(char) * i + 1);
     i = 0;
-    while(ft_isalpha(str[i]))
+    while (ft_isalpha(str[i]))
+        i++;
+    string = malloc(sizeof(char) * i + 1);
+    i = 0;
+    while (ft_isalpha(str[i]))
     {
         string[i] = str[i];
         i++;
@@ -42,42 +43,97 @@ static int     create_token(char *data, int type, t_lexer *lexer)
     return (0);
 }
 
+static int     check_closing_quote(t_lexer *lexer)
+{
+    t_list *lst;
+    int q;
+    int d;
+
+    q = 0;
+    d = 0;
+    lst = lexer->tokens;
+    while (lst)
+    {
+        if (t_access(lst)->type == QOUTE)
+            q++;
+        if (t_access(lst)->type == DQUOTE)
+            d++;
+        lst = lst->next;
+    }
+    if (q % 2 != 0 || d % 2 != 0)
+        return (-1);
+    return (0);
+}
+
+static int     lexer_control_op(char *line, t_lexer *lexer, int *index)
+{
+    int i;
+    int ok;
+
+    ok = 0;
+    i = 0;
+    while (line[i])
+    {
+        if (ft_isalpha(line[i]))
+        {
+            ok = 1;
+            break;
+        }
+        i++;
+    }
+    if (ok)
+    {
+        i = 0;
+        if (line[i] == '>')
+        {
+            if (line[i + 1] && line[i + 1] == '>')
+            {
+                create_token(">>", DGREATER, lexer);
+                *index = *index + 1;
+            }
+            else
+                create_token(">", GREATER, lexer);
+        }
+        else if (line[i] == '|')
+            create_token("|", PIPE, lexer);
+        return (1);
+    }
+    else
+        return (0);
+}
+
 int     build_lexer(char *line, t_lexer *lexer)
 {
     int i = 0;
     int len;
 
-    while(line[i])
+    while (line[i])
     {
         if (ft_isalpha(line[i]))
         {
-            len = generate_cmd_token(line + i, lexer);
-            i += len - 1;
+            len = word_token(line + i, lexer);
+            i += len;
         }
-        else if (line[i] == '|')
-            create_token("|", PIPE, lexer);
-        else if (line[i] == '\'')
-            create_token("'", QOUTE, lexer);
-        else if (line[i] == '\"')
-            create_token("\"", DQUOTE, lexer);
-        else if (line[i] == ';')
-            create_token(";", SEMICOLON, lexer);
-        else if (line[i] == '&')
-            create_token("&", AMPERSAND, lexer);
-        else if (line[i] == '\n')
-            create_token("\n", NEWLINE, lexer);
-        else if (line[i] == '>')
+        if (line[i] == '|' || line[i] == '>' || line[i] == '<')
         {
-            if (line[i + 1] && line[i + 1] == '>')
-                create_token(">>", DGREATER, lexer);
-            else
-                create_token(">", GREATER, lexer);
+            if (!lexer_control_op(line + i, lexer, &i))
+                return (error("Parsing error around controle operator\n", -1));
         }
-        else if (line[i] == '<')
-            create_token("<", LESSER, lexer);
-        else if (line[i] == '-')
+        if (line[i] == ';')
+            create_token(";", SEMICOLON, lexer);
+        if (line[i] == '&')
+            create_token("&", SEMICOLON, lexer);
+        if (line[i] == '-')
             create_token("-", DASH, lexer);
+        if (line[i] == '\n')
+            create_token("\n", NEWLINE, lexer);
+        if (line[i] == '\'')
+            create_token("\'", QOUTE, lexer);
+        if (line[i] == '\"')
+            create_token("\"", DQUOTE, lexer);
         i++;
     }
+    if (check_closing_quote(lexer) == -1)
+        return (error("Parsing error missing closing quote\n", -1));
     return (0);
 }

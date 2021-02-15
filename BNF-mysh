@@ -1,3 +1,7 @@
+<input>        ::= <commannd line> '\n'
+                | <command line> EOF
+                | '\n'
+                | EOF
 <command line> ::=      <task>
                 |       <task> '&'
                 |       <task> '&' <command line>
@@ -5,27 +9,12 @@
                 |       <task> ';' <command line>
 
 <task>           ::=     <command>
-                |       <task> '|' <command>
+                |       <task> '|' <task>
 <command>       ::=     <simple command>
                 |       <simple command> '<' <filename>
                 |       <simple command> '>' <filename>
 
-<simple command> ::=   <pathname>
-                |       <simple command> <token>
+<simple command> ::= <pathname> <token list>
 
-<simple command>::= <pathname> <token list>
-<token list> ::= <token> <token list>
-                |   (EMPTY)
-
-
-Simple version only with ;
-<command line> ::= <command>
-                 | <command> ';'
-                 | <command> ';' <command line>
-<command> ::= <pathname> <list tokens>
-<list tokens> ::= <token> <list tokens>
-                | (EMPTY)
-    
-Convert to EBNF
-<command> ::= <pathname> [<list tokens]
-<list tokens> ::= <token> {<list tokens} | EMPTY
+<token list>	::=		<token> <token list>
+						|	(EMPTY)
