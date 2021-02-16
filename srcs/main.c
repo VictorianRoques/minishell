@@ -33,11 +33,10 @@ void        free_lexer(t_list *lst_tokens)
     }
 }
 
-t_node *create_node(void *data, int type)
+t_node *create_node(void *data)
 {
     t_node *toto = malloc(sizeof(t_node));
     toto->data = data;
-    toto->type = type;
     toto->left = NULL;
     toto->right = NULL;
     return (toto);
@@ -55,140 +54,58 @@ void    attach_right(t_node *root, t_node *right)
         root->right = right;
 }
 
-void     parse_token(t_node *root, t_list **lst_tokens)
+void    parse_token(t_node *root, t_list **tokens)
 {
-    t_node  *node;
-    int     type;
-    char    *data;
+    t_node *node;
 
-    if (!*lst_tokens)
+    if (!*tokens)
         return ;
-    type = t_access(*lst_tokens)->type;
-    data = t_access(*lst_tokens)->data;
-    if (type == WORD)
+    if (t_access(*tokens)->type == WORD)
     {
-        node = create_node(data, TOKEN);
+        node = create_node(t_access(*tokens)->data);
         attach_left(root, node);
-        *lst_tokens = (*lst_tokens)->next;
+        *tokens = (*tokens)->next;
     }
 }
-
-void     parse_tokens_list(t_node *root, t_list **lst_tokens)
+void    parse_simple_command(t_node *root, t_list **tokens)
 {
     t_node *node;
-    int     type;
-    char    *data;
 
-    if (!*lst_tokens)
+    if (!*tokens)
         return ;
-    
-    parse_token(root, lst_tokens);
-    type = t_access(*lst_tokens)->type;
-    data = t_access(*lst_tokens)->data;
-    if (type == WORD)
-    {
-        root = root->left;
-        parse_tokens_list(root, lst_tokens);
-    }
+    parse_token(root, tokens);
+    if (t_access(*tokens)->type == WORD)
+        parse_simple_command(root->left, tokens);
 }
 
-void     parse_simple_cmd(t_node *root, t_list **lst_tokens)
+void    parse_command(t_node *root, t_list **tokens)
 {
     t_node *node;
-    t_node *toto;
 
-    char *data;
-    int type;
-
-    if (!*lst_tokens)
+    if (!*tokens)
         return ;
-    data = t_access(*lst_tokens)->data;
-    type = t_access(*lst_tokens)->type;
-    if (type == WORD)
+    parse_simple_command(root, tokens);
+    if (t_access(*tokens)->type == GREATER)
     {
-        node = create_node(data, PATHNAME);
-        attach_left(root, node);
-        *lst_tokens = (*lst_tokens)->next;
-        type = t_access(*lst_tokens)->type;
-        if (type == WORD)
-        {
-            toto = create_node(t_access(*lst_tokens)->data, TOKENS_LST);
-            attach_left(node, toto);
-            parse_tokens_list(node, lst_tokens);
-        }
+        node = create_node(t_access(*tokens)->data);
+        attach_right(root->left, node);
+        *tokens = (*tokens)->next;
+        parse_command(root->left->right, tokens);
     }
 }
-
-void     parse_cmd(t_node *root, t_list **lst_tokens)
+void    parse_task(t_node *root, t_list **tokens)
 {
     t_node *node;
-    int type;
 
-    if (!*lst_tokens)
-        return ;
-    parse_simple_cmd(root, lst_tokens);
-    type = t_access(*lst_tokens)->type;
-    if (type == GREATER || type == DGREATER || type == LESSER)
+    if (!*tokens)
+        return;
+    parse_command(root, tokens);
+    if (t_access(*tokens)->type == PIPE)
     {
-        node = create_node(t_access(*lst_tokens)->data, type);
+        node = create_node(t_access(*tokens)->data);
         attach_right(root, node);
-        *lst_tokens = (*lst_tokens)->next;
-        if (t_access(*lst_tokens)->type == WORD)
-        {
-            node = create_node(t_access(*lst_tokens)->data, FILENAME);
-            attach_left(root->right, node);
-            *lst_tokens = (*lst_tokens)->next;
-
-        }
-        else
-            printf("Error no filename after redirection \n");
-    }
-}
-
-void     parse_task(t_node *root, t_list **lst_tokens)
-{
-    t_node *node;
-
-    if (!*lst_tokens)
-        return ;
-    parse_cmd(root, lst_tokens);
-    if (t_access(*lst_tokens)->type == PIPE)
-    {
-        node = create_node(t_access(*lst_tokens)->data, PIPE);
-        attach_right(root, node);
-        *lst_tokens = (*lst_tokens)->next;
-        parse_task(root->right, lst_tokens);
-    }
-}
-
-void     parse_cmd_line(t_node *root, t_list **lst_tokens)
-{
-    t_node *node;
-
-    if (!*lst_tokens)
-        return ;
-    parse_task(root, lst_tokens);
-    if (t_access(*lst_tokens)->type == SEMICOLON
-        || t_access(*lst_tokens)->type == AMPERSAND)
-    {
-        node = create_node(t_access(*lst_tokens)->data, SEMICOLON);
-        attach_right(root, node);
-        *lst_tokens = (*lst_tokens)->next;
-        parse_cmd_line(root->right, lst_tokens);
-    }
-}
-void         parse_input(t_node *root, t_list **lst_tokens)
-{
-    t_node *node;
-
-    if (!*lst_tokens)
-        return ;
-    parse_cmd_line(root, lst_tokens);
-    if (t_access(*lst_tokens)->type == NEWLINE)
-    {
-        node = create_node(t_access(*lst_tokens)->data, '\n');
-            attach_right(root, node);
-        *lst_tokens = (*lst_tokens)->next;
+        *tokens = (*tokens)->next;
+        parse_task(root->right, tokens);
     }
 }
 
@@ -196,7 +113,7 @@ void        print_preorder(t_node *node)
 {
     if (node == NULL)
         return;
-    printf("%s %d\n", node->data, node->type);
+    printf("%s\n", node->data);
     print_preorder(node->left);
     print_preorder(node->right);
 }
@@ -207,8 +124,7 @@ void        parse(t_node *root, t_lexer *lexer)
 
     t_node *tree;
     lst_tokens = lexer->tokens;
-    // parse_input(root, &lst_tokens);
-    parse_cmd_line(root, &lst_tokens);
+    parse_task(root, &lexer->tokens);
     printf("PARSING\n");
     print_preorder(root);
 }
@@ -219,13 +135,13 @@ int     main()
     t_node *tree;
 
     ft_bzero(&lexer, sizeof(t_lexer));
-    if (build_lexer("echo toto > popo eoeo toto ; I; AM ; GROOT;\n", &lexer) == -1)
+    if (build_lexer("echo toto > popo | ls > papa | toto > yoyo \n", &lexer) == -1)
     {
         free_lexer(lexer.tokens);
         return (-1);
     }
     print_lst_tokens(&lexer);
-    tree = create_node("input", INPUT);
+    tree = create_node("input");
     parse(tree, &lexer);
     free_lexer(lexer.tokens);
     return(0);

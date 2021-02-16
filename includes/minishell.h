@@ -33,20 +33,8 @@ typedef struct s_lexer {
     int     nb_tokens;
 } t_lexer;
 
-typedef enum e_node_type {
-    INPUT,
-    CMD_LINE,
-    TASK,
-    CMD,
-    SIMPLE_CMD,
-    FILENAME,
-    PATHNAME,
-    TOKENS_LST,
-    TOKEN
-} t_node_type;
 
 typedef struct s_node {
-    int type;
     char *data;
     struct s_node *left;
     struct s_node *right;

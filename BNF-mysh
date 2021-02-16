@@ -12,9 +12,14 @@
                 |       <task> '|' <task>
 <command>       ::=     <simple command>
                 |       <simple command> '<' <filename>
-                |       <simple command> '>' <filename>
+                |       <simple command> '>' 
 
 <simple command> ::= <pathname> <token list>
 
 <token list>	::=		<token> <token list>
 						|	(EMPTY)
+
+
+
+// NOTES
+<simple command> ::= <token list> (pathname is the first)

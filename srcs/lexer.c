@@ -112,12 +112,12 @@ int     build_lexer(char *line, t_lexer *lexer)
         if (ft_isalpha(line[i]))
         {
             len = word_token(line + i, lexer);
-            i += len;
+            i += len - 1;
         }
         if (line[i] == '|' || line[i] == '>' || line[i] == '<')
         {
             if (!lexer_control_op(line + i, lexer, &i))
-                return (error("Parsing error around controle operator\n", -1));
+                return (error("error around controle operator\n", -1));
         }
         if (line[i] == ';')
             create_token(";", SEMICOLON, lexer);
@@ -134,6 +134,6 @@ int     build_lexer(char *line, t_lexer *lexer)
         i++;
     }
     if (check_closing_quote(lexer) == -1)
-        return (error("Parsing error missing closing quote\n", -1));
+        return (error("error missing closing quote\n", -1));
     return (0);
 }
