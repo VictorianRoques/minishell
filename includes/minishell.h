@@ -23,6 +23,17 @@ typedef enum e_token_type{
     WORD,
 } t_token_type;
 
+typedef enum e_node_type {
+    NODE_PIPE,
+    NODE_BACKGROUND,
+    NODE_SEQ,
+    NODE_REDIRECT_IN,
+    NODE_REDIRECT_OUT,
+    NODE_CMD_PATH,
+    NODE_ARGUMENT,
+    NODE_DATA
+} t_node_type;
+
 typedef struct s_token {
     char *data;
     t_token_type type;
@@ -35,6 +46,7 @@ typedef struct s_lexer {
 
 
 typedef struct s_node {
+    int type;
     char *data;
     struct s_node *left;
     struct s_node *right;

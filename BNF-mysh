@@ -22,4 +22,4 @@
 
 
 // NOTES
-<simple command> ::= <token list> (pathname is the first)
+<simple command> ::= <token list> (pathname is the first) 

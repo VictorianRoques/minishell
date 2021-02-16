@@ -85,7 +85,7 @@ void    parse_command(t_node *root, t_list **tokens)
     if (!*tokens)
         return ;
     parse_simple_command(root, tokens);
-    if (t_access(*tokens)->type == GREATER)
+    if (t_access(*tokens)->type == GREATER || t_access(*tokens)->type == LESSER)
     {
         node = create_node(t_access(*tokens)->data);
         attach_right(root->left, node);
@@ -93,7 +93,7 @@ void    parse_command(t_node *root, t_list **tokens)
         parse_command(root->left->right, tokens);
     }
 }
-void    parse_task(t_node *root, t_list **tokens)
+void        parse_task(t_node *root, t_list **tokens)
 {
     t_node *node;
 
@@ -106,6 +106,29 @@ void    parse_task(t_node *root, t_list **tokens)
         attach_right(root, node);
         *tokens = (*tokens)->next;
         parse_task(root->right, tokens);
+    }
+}
+void    parse_cmd_line(t_node *root, t_list **tokens)
+{
+    t_node *node;
+
+    if (!*tokens)
+        return;
+    parse_task(root, tokens);
+    if (t_access(*tokens)->type == SEMICOLON || t_access(*tokens)->type == AMPERSAND)
+    {
+        node = create_node(t_access(*tokens)->data);
+        *tokens = (*tokens)->next;
+        if (root->right)
+        {
+            attach_right(root->right, node);
+            parse_cmd_line(root->right->right, tokens);
+        }
+        else
+        {
+            attach_right(root, node);
+            parse_cmd_line(root->right, tokens);
+        }
     }
 }
 
@@ -124,7 +147,7 @@ void        parse(t_node *root, t_lexer *lexer)
 
     t_node *tree;
     lst_tokens = lexer->tokens;
-    parse_task(root, &lexer->tokens);
+    parse_cmd_line(root, &lexer->tokens);
     printf("PARSING\n");
     print_preorder(root);
 }
@@ -135,7 +158,7 @@ int     main()
     t_node *tree;
 
     ft_bzero(&lexer, sizeof(t_lexer));
-    if (build_lexer("echo toto > popo | ls > papa | toto > yoyo \n", &lexer) == -1)
+    if (build_lexer("echo toto > popo | ls >; toto; yoyo \n", &lexer) == -1)
     {
         free_lexer(lexer.tokens);
         return (-1);
