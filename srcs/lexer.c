@@ -43,6 +43,12 @@ static int     create_token(char *data, int type, t_lexer *lexer)
     return (0);
 }
 
+static void     del_token(t_list *lst)
+{
+    free(t_access(lst)->data);
+    free(t_access(lst));
+}
+
 static int     check_closing_quote(t_lexer *lexer)
 {
     t_list *lst;
@@ -62,6 +68,27 @@ static int     check_closing_quote(t_lexer *lexer)
     }
     if (q % 2 != 0 || d % 2 != 0)
         return (-1);
+    // remove_quote_from_lexer(lexer);
+    return (0);
+}
+
+int     check_operator_control(t_lexer *lexer)
+{
+    t_list  *lst;
+    int     type;
+
+    lst = lexer->tokens;
+    while (lst)
+    {
+        type = t_access(lst)->type;
+        if (type == GREATER || type == LESSER || type == DGREATER
+            || type == PIPE)
+        {
+            if (!lst->next || t_access(lst->next)->type != WORD)
+                return (-1);
+        }
+        lst = lst->next;
+    }
     return (0);
 }
 
@@ -135,5 +162,7 @@ int     build_lexer(char *line, t_lexer *lexer)
     }
     if (check_closing_quote(lexer) == -1)
         return (error("error missing closing quote\n", -1));
+    if (check_operator_control(lexer) == -1)
+        return (error("error around controle operator\n", -1));
     return (0);
 }

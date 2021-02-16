@@ -39,7 +39,7 @@ int     main()
     t_node *tree;
 
     ft_bzero(&lexer, sizeof(t_lexer));
-    if (build_lexer("echo toto > popo | ls >; toto; yoyo \n", &lexer) == -1)
+    if (build_lexer("echo toto > popo | toto >  lala ; toto; yoyo \n", &lexer) == -1)
     {
         free_lexer(lexer.tokens);
         return (-1);
