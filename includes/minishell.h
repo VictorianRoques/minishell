@@ -56,5 +56,7 @@ int         error(char *msg, int ret);
 void        free_tab(char **tab);
 t_token     *t_access(t_list *lst);
 int         build_lexer(char *line, t_lexer *lexer);
+void        parse(t_node *root, t_lexer *lexer);
+t_node      *create_node(void *data);
 
 #endif
