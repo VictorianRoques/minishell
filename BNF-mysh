@@ -16,6 +16,9 @@
 
 <simple command> ::= <pathname> <token list>
 
+<options> ::= '-' <token>
+            | <options>
+
 <token list>	::=		<token> <token list>
 						|	(EMPTY)
 

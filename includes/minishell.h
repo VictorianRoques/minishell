@@ -4,6 +4,8 @@
 # include <stdio.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <sys/stat.h>
+# include <fcntl.h>
 # include <signal.h>
 # include "../libft/libft.h"
 
@@ -24,14 +26,12 @@ typedef enum e_token_type{
 } t_token_type;
 
 typedef enum e_node_type {
+    NODE_ARG,
     NODE_PIPE,
-    NODE_BACKGROUND,
-    NODE_SEQ,
-    NODE_REDIRECT_IN,
-    NODE_REDIRECT_OUT,
-    NODE_CMD_PATH,
-    NODE_ARGUMENT,
-    NODE_DATA
+    NODE_PIPE_LST,
+    NODE_CMD_LINE,
+    NODE_CMD,
+    NODE_IO_MODIFIER
 } t_node_type;
 
 typedef struct s_token {
@@ -56,7 +56,6 @@ int         error(char *msg, int ret);
 void        free_tab(char **tab);
 t_token     *t_access(t_list *lst);
 int         build_lexer(char *line, t_lexer *lexer);
-void        parse(t_node *root, t_lexer *lexer);
-t_node      *create_node(void *data);
-
+t_node      *parse(t_lexer *lexer);
+t_node      *create_node(void *data, int type);
 #endif

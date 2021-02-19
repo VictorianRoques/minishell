@@ -8,11 +8,11 @@ static int         word_token(char *str, t_lexer *lexer)
     char *string;
 
     i = 0;
-    while (ft_isalpha(str[i]))
+    while (ft_isalpha(str[i]) || str[i] == '-')
         i++;
     string = malloc(sizeof(char) * i + 1);
     i = 0;
-    while (ft_isalpha(str[i]))
+    while (ft_isalpha(str[i]) || str[i] == '-')
     {
         string[i] = str[i];
         i++;
@@ -151,7 +151,10 @@ int     build_lexer(char *line, t_lexer *lexer)
         if (line[i] == '&')
             create_token("&", SEMICOLON, lexer);
         if (line[i] == '-')
-            create_token("-", DASH, lexer);
+        {
+            len = word_token(line + i, lexer);
+            i += len - 1;
+        }
         if (line[i] == '\n')
             create_token("\n", NEWLINE, lexer);
         if (line[i] == '\'')
