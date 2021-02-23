@@ -1,107 +1,39 @@
 #include "../includes/minishell.h"
+t_node      *build_args(t_list **token);
+t_node      *build_arg_1(t_list **token);
+t_node      *build_arg_2();
+t_node      *build_builtin(t_list **token);
+t_node      *build_builtin_1(t_list **token);
+t_node      *build_filename(t_list **token);
+t_node      *build_filename_1(t_list **token);
+t_node      *build_filename_2(t_list **token);
+t_node      *build_command(t_list **token);
+t_node      *build_command_1(t_list **token);
+t_node      *build_command_2(t_list **token);
+t_node      *build_command_3(t_list **token);
+t_node      *build_command_4(t_list **token);
+t_node      *build_job(t_list **token);
+t_node      *build_job_1(t_list **token);
+t_node      *build_job_2(t_list **token);
+t_node      *build_line(t_list **token);
+t_node      *build_line_1(t_list **token);
+t_node      *build_line_2(t_list **token);
+t_node      *build_line_3(t_list **token);
 
-t_node      *create_node(void *data, int type)
+int     check(int tok_type, char** bufferptr, t_list **token)
 {
-    t_node *toto = malloc(sizeof(t_node));
-    toto->data = data;
-    toto->type = type;
-    toto->left = NULL;
-    toto->right = NULL;
-    return (toto);
-}
-
-void        attach_left(t_node *root, t_node *left)
-{
-    if (root)
-        root->left = left;
-}
-
-void    attach_right(t_node *root, t_node *right)
-{
-    if (root)
-        root->right = right;
-}
-void    parse_pathname(t_node *root, t_list **tokens)
-{
-    t_node *node;
-
-    if (!*tokens)
-        return ;
-    if (t_access(*tokens)->type == WORD)
+	if (*token == NULL)
+		return 0;
+    if (t_access(*token)->type == tok_type)
     {
-        node = create_node(t_access(*tokens)->data, NODE_CMD);
-        attach_left(root, node);
-        *tokens = (*tokens)->next;
+		if (bufferptr != NULL) {
+			*bufferptr = ft_strdup(t_access(*token)->data);
+		}
+		*token = (*token)->next;
+        return 1;
     }
-}
-
-void    parse_arg(t_node *root, t_list **tokens)
-{
-    t_node *node;
-
-    if (!*tokens)
-        return ;
-    if (t_access(*tokens)->type == WORD)
-    {
-        node = create_node(t_access(*tokens)->data, NODE_ARG);
-        attach_left(root, node);
-        *tokens = (*tokens)->next;
-    }
-}
-void    parse_args_list(t_node *root, t_list **tokens)
-{
-    t_node *node;
-
-    if (!*tokens)
-        return ;
-    parse_arg(root, tokens);
-    if (t_access(*tokens)->type == WORD)
-        parse_arg(root->left, tokens);
-}
-
-void    parse_cmd_and_args(t_node *root, t_list **tokens)
-{
-    t_node *node;
-
-    if (!*tokens)
-        return ;
-    parse_pathname(root, tokens);
-    if (t_access(*tokens)->type == WORD)
-        parse_args_list(root->left, tokens);
-    if (t_access(*tokens)->type == GREATER ||
-        t_access(*tokens)->type == LESSER)
-    {
-        node = create_node(t_access(*tokens)->data, NODE_IO_MODIFIER);
-        attach_right(root, node);
-        *tokens = (*tokens)->next;
-        parse_arg(root->right, tokens);
-    }
-}
-
-void    parse_pipe(t_node *root, t_list **tokens)
-{
-    t_node *node;
-
-    if (!*tokens)
-        return ;
-    parse_cmd_and_args(root, tokens);
-    if (t_access(*tokens)->type == PIPE)
-    {
-        node = create_node(t_access(*tokens)->data, NODE_PIPE);
-        attach_right(root, node);
-        *tokens = (*tokens)->next;
-        parse_pipe(root->right, tokens);
-    }
-}
-t_node      *parse_pipe_list(t_list **tokens)
-{
-    t_node *root;
-    
-    if (!*tokens)
-        return NULL;
-    root = create_node("PIPE_LST", NODE_CMD_LINE);
-    parse_pipe(root, tokens);
-    return (root);
+    *token = (*token)->next;
+    return 0;
 }
 
 void        print_preorder(t_node *node)
@@ -112,15 +44,285 @@ void        print_preorder(t_node *node)
     print_preorder(node->left);
     print_preorder(node->right);
 }
+t_node      *build_line(t_list **token)
+{
+    t_node *node;
+    t_list *save;
 
-t_node        *parse(t_lexer *lexer)
+    save = *token;
+    if ((*token = save, node = build_line_1(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_line_2(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_line_3(token)) != NULL)
+        return (node);
+    return (NULL);
+}
+t_node      *build_line_1(t_list **token)
+{
+    t_node *result;
+    t_node *job;
+    t_node *line;
+
+    if ((job = build_job(token)) == NULL)
+        return (NULL);
+    if (!check(SEMICOLON, NULL, token))
+    {
+        ast_delete_node(job);
+        return (NULL);
+    }
+    if ((line = build_line(token)) == NULL)
+    {
+        ast_delete_node(job);
+        return (NULL);
+    }
+    result = malloc(sizeof(*result));
+    ast_set_type(result, NODE_LINE);
+    ast_set_data(result, NULL);
+    ast_attach_branch(result, job, line);
+    return (result);
+}
+
+t_node      *build_line_2(t_list **token)
+{
+    t_node *job;
+
+    if ((job = build_job(token)) == NULL)
+        return (NULL);
+    if (!check(SEMICOLON, NULL, token))
+    {
+        ast_delete_node(job);
+        return (NULL);
+    }
+    return (job);
+}
+
+t_node      *build_line_3(t_list **token)
+{
+    return (build_job(token));
+}
+
+t_node      *build_job(t_list **token)
+{
+    t_node *node;
+    t_list *save;
+
+    save = *token;
+    if ((*token = save, node = build_job_1(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_job_2(token)) != NULL)
+        return (node);
+    return (NULL);
+}
+
+t_node      *build_job_1(t_list **token)
+{
+    t_node *result;
+    t_node *command;
+    t_node *job;
+
+    if ((command = build_command(token)) == NULL)
+        return (NULL);
+    if (!check(PIPE, NULL, token))
+    {
+        ast_delete_node(command);
+        return (NULL);
+    }
+    if ((job = build_job(token)) == NULL)
+    {
+        ast_delete_node(command);
+        return (NULL);
+    }
+    result = malloc(sizeof(*result));
+    ast_set_type(result, NODE_PIPE);
+    ast_set_data(result, NULL);
+    ast_attach_branch(result, command, job);
+    return (result);
+}
+
+t_node      *build_job_2(t_list **token)
+{
+  return (build_command(token));
+}
+
+t_node      *build_command(t_list **token)
+{
+    t_node *node;
+    t_list *save;
+
+    save = *token;
+    if ((*token = save, node = build_command_1(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_command_2(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_command_3(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_command_4(token)) != NULL)
+        return (node);
+    return (NULL);
+}
+
+t_node      *build_command_4(t_list **token)
+{
+    return (build_builtin(token));
+}
+
+t_node      *build_command_3(t_list **token)
+{
+    t_node *result;
+    t_node *builtin;
+    char *filename;
+
+   if ((builtin = build_builtin(token)) == NULL)
+       return (NULL);
+    if (!check(DGREATER, NULL, token))
+    {
+        ast_delete_node(builtin);
+        return (NULL);
+    }
+    if (!check(WORD, &filename, token))
+    {
+        ast_delete_node(builtin);
+        return (NULL);
+    }
+    result = malloc(sizeof(*result));
+    ast_set_data(result, filename);
+    ast_set_type(result, NODE_REDIRECT_DIN);
+    ast_attach_branch(result, builtin, NULL);
+    return (result);
+}
+
+t_node      *build_command_2(t_list **token)
+{
+    t_node *result;
+    t_node *builtin;
+    char *filename;
+
+   if ((builtin = build_builtin(token)) == NULL)
+       return (NULL);
+    if (!check(LESSER, NULL, token))
+    {
+        ast_delete_node(builtin);
+        return (NULL);
+    }
+    if (!check(WORD, &filename, token))
+    {
+        ast_delete_node(builtin);
+        return (NULL);
+    }
+    result = malloc(sizeof(*result));
+    ast_set_data(result, filename);
+    ast_set_type(result, NODE_REDIRECT_OUT);
+    ast_attach_branch(result, builtin, NULL);
+    return (result);
+}
+
+t_node      *build_command_1(t_list **token)
+{
+    t_node *result;
+    t_node *builtin;
+    char *filename;
+
+   if ((builtin = build_builtin(token)) == NULL)
+       return (NULL);
+    if (!check(GREATER, NULL, token))
+    {
+        ast_delete_node(builtin);
+        return (NULL);
+    }
+    if (!check(WORD, &filename, token))
+    {
+        ast_delete_node(builtin);
+        return (NULL);
+    }
+    result = malloc(sizeof(*result));
+    ast_set_data(result, filename);
+    ast_set_type(result, NODE_REDIRECT_IN);
+    ast_attach_branch(result, builtin, NULL);
+    return (result);
+}
+
+// t_node      *build_filename(t_list **token)
+// {
+//     t_list *save;
+//     t_node *node;
+
+//     save = token;
+//     if ((*token = save, node = build_filename_1(token)) != NULL)
+//         return (node);
+//     if ((*token = save, node = build_filename_2(token)) != NULL)
+//         return (node);
+//     if ((*token = save, node = build_filename_3(token)) != NULL)
+//         return (node);
+// }
+
+t_node        *build_builtin(t_list **token)
+{
+    return (build_builtin_1(token));
+}
+
+t_node          *build_builtin_1(t_list **token)
+{
+    t_node      *result;
+    t_node      *args;
+    char        *pathname;
+
+    if (!check(WORD, &pathname, token))
+        return (NULL);
+    args = build_args(token);
+    result = malloc(sizeof(*result));
+    ast_set_data(result, pathname);
+    ast_set_type(result, NODE_BUILTIN);
+    ast_attach_branch(result, args, NULL);
+    return (result);
+}
+
+t_node        *build_args(t_list **token)
+{
+    t_node *node;
+    t_list *save;
+
+    save = *token;
+    if ((*token = save, node = build_arg_1(token)) != NULL)
+        return node;
+    if ((*token = save, node = build_arg_2()) != NULL)
+        return node;
+    return NULL;
+}
+
+t_node      *build_arg_1(t_list **token)
+{
+    t_node *args_list;
+    t_node *result;
+    char *arg;
+
+    if (!check(WORD, &arg, token))
+        return NULL;
+    args_list = build_args(token);
+    result = malloc(sizeof(*result));
+    ast_set_data(result, arg);
+    ast_set_type(result, NODE_ARG);
+    ast_attach_branch(result, args_list, NULL);
+    return (result);
+}
+
+t_node      *build_arg_2()
+{
+    return (NULL);
+}
+
+int       parse(t_lexer *lexer, t_node **exec_tree)
 {
     t_list *tokens;
-    t_node *tree;
 
     tokens = lexer->tokens;
-    tree = parse_pipe_list(&tokens);
-    // printf("PARSING\n");
-    // print_preorder(tree);
-    return (tree);
-}
+    *exec_tree = build_line(&(tokens));
+     if (tokens != NULL && t_access(tokens)->type != NEWLINE)
+    {
+        printf("Syntax Error near: %s\n", t_access(tokens)->data);
+        return (-1);
+    }
+    printf("PARSING\n");
+    print_preorder(*exec_tree);
+    return (0);
+} 

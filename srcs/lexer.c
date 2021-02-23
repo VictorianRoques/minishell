@@ -49,84 +49,35 @@ static void     del_token(t_list *lst)
     free(t_access(lst));
 }
 
-static int     check_closing_quote(t_lexer *lexer)
-{
-    t_list *lst;
-    int q;
-    int d;
-
-    q = 0;
-    d = 0;
-    lst = lexer->tokens;
-    while (lst)
-    {
-        if (t_access(lst)->type == QOUTE)
-            q++;
-        if (t_access(lst)->type == DQUOTE)
-            d++;
-        lst = lst->next;
-    }
-    if (q % 2 != 0 || d % 2 != 0)
-        return (-1);
-    // remove_quote_from_lexer(lexer);
-    return (0);
-}
-
-int     check_operator_control(t_lexer *lexer)
-{
-    t_list  *lst;
-    int     type;
-
-    lst = lexer->tokens;
-    while (lst)
-    {
-        type = t_access(lst)->type;
-        if (type == GREATER || type == LESSER || type == DGREATER
-            || type == PIPE)
-        {
-            if (!lst->next || t_access(lst->next)->type != WORD)
-                return (-1);
-        }
-        lst = lst->next;
-    }
-    return (0);
-}
-
-static int     lexer_control_op(char *line, t_lexer *lexer, int *index)
+int     handle_quote(char *line, t_lexer *lexer, char quote)
 {
     int i;
-    int ok;
+    int j;
+    char *str;
+    t_token *token;
+    t_list *lst;
 
-    ok = 0;
-    i = 0;
-    while (line[i])
+    if (!line[1] || !ft_strchr(line + 1, quote))
+        return (error("Missing closing quote\n", -1));
+    i = 1;
+    while (line[i] != quote)
+        i++;
+    str = malloc(sizeof(char) * i + 1);
+    i = 1;
+    j = 0;
+    while (line[i] != quote)
     {
-        if (ft_isalpha(line[i]))
-        {
-            ok = 1;
-            break;
-        }
+        str[j] = line[i];
+        j++;
         i++;
     }
-    if (ok)
-    {
-        i = 0;
-        if (line[i] == '>')
-        {
-            if (line[i + 1] && line[i + 1] == '>')
-            {
-                create_token(">>", DGREATER, lexer);
-                *index = *index + 1;
-            }
-            else
-                create_token(">", GREATER, lexer);
-        }
-        else if (line[i] == '|')
-            create_token("|", PIPE, lexer);
-        return (1);
-    }
-    else
-        return (0);
+    str[j] = 0;
+    token = malloc(sizeof(t_token));
+    token->type = WORD,
+    token->data = str;
+    lst = ft_lstnew(token);
+     ft_lstadd_back(&(lexer->tokens), lst);
+    return (i);
 }
 
 int     build_lexer(char *line, t_lexer *lexer)
@@ -141,15 +92,24 @@ int     build_lexer(char *line, t_lexer *lexer)
             len = word_token(line + i, lexer);
             i += len - 1;
         }
-        if (line[i] == '|' || line[i] == '>' || line[i] == '<')
+        if (line[i] == '|')
+            create_token("|", PIPE, lexer);
+        if (line[i] == '>')
         {
-            if (!lexer_control_op(line + i, lexer, &i))
-                return (error("error around controle operator\n", -1));
+            if (line[i + 1] && line[i + 1] == '>')
+            {
+                create_token(">>", DGREATER, lexer);
+                i++;
+            }
+            else
+                create_token(">", GREATER, lexer);
         }
+        if (line[i] == '<')
+            create_token("<", LESSER, lexer);
         if (line[i] == ';')
             create_token(";", SEMICOLON, lexer);
         if (line[i] == '&')
-            create_token("&", SEMICOLON, lexer);
+            create_token("&", AMPERSAND, lexer);
         if (line[i] == '-')
         {
             len = word_token(line + i, lexer);
@@ -157,15 +117,13 @@ int     build_lexer(char *line, t_lexer *lexer)
         }
         if (line[i] == '\n')
             create_token("\n", NEWLINE, lexer);
-        if (line[i] == '\'')
-            create_token("\'", QOUTE, lexer);
-        if (line[i] == '\"')
-            create_token("\"", DQUOTE, lexer);
+        if (line[i] == '\'' || line[i] == '\"')
+        {
+            if ((len = handle_quote(line + i, lexer, line[i])) == -1)
+                return (-1);
+            i += len;
+        }
         i++;
     }
-    if (check_closing_quote(lexer) == -1)
-        return (error("error missing closing quote\n", -1));
-    if (check_operator_control(lexer) == -1)
-        return (error("error around controle operator\n", -1));
     return (0);
 }

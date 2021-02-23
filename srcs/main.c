@@ -87,30 +87,24 @@ int     execute_cmd(t_node *cmd, char **env)
     return (1);
 }
 
-void    execute_pipe_lst(t_node *node, char **env)
-{
-    if (node == NULL)
-        return;
-    if (node->type == NODE_CMD)
-        execute_cmd(node, env);
-    execute_pipe_lst(node->left, env);
-    execute_pipe_lst(node->right, env);
-}
-
 int     main(int ac, char **argv, char **env)
 {
     t_lexer lexer;
-    t_node *tree;
+    t_node *exec_tree;
 
     ft_bzero(&lexer, sizeof(t_lexer));
-    if (build_lexer("ls -la | echo toto\n", &lexer) == -1)
+    if (build_lexer("ls la > toto\n", &lexer) == -1)
     {
         free_lexer(lexer.tokens);
         return (-1);
     }
-    // print_lst_tokens(&lexer);
-    tree = parse(&lexer);
-    execute_pipe_lst(tree, env);
+    print_lst_tokens(&lexer);
+    if (lexer.nb_tokens == 0 || parse(&lexer, &exec_tree) == -1)
+    {
+        free_lexer(lexer.tokens);
+        return (-1);
+    }
+    // execute_pipe_lst(tree, env);
     free_lexer(lexer.tokens);
     return(0);
 }
