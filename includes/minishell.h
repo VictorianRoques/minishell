@@ -21,13 +21,13 @@
             |       <job> ';'                       build_line_2
             |       <job>                           build_line_5
 **
-**  job     ::=     <command> '|' <job>             build_job_tree_1
-            |       <command>                       build_job_tree_2
+**  job     ::=     <command> '|' <job>             build_job__1
+            |       <command>                       build_job_2
 **
 **  command ::=     <builtin> '>' <filename>        build_command_1
-**          |       <builtin> '<' <filename>        build_command_tree_2
-**          |       <builtin> '>>' <filename>       build_command_tree_3
-**          |       <builtin>                       build_command_tree_4
+**          |       <builtin> '<' <filename>        build_command_2
+**          |       <builtin> '>>' <filename>       build_command_3
+**          |       <builtin>                       build_command_4
 **          
 ** filemame ::=     <filename> '>' <filename>
 **          |       <filename> '>>' <filename>
@@ -82,6 +82,17 @@ typedef struct s_node {
     struct s_node *right;
 } t_node;
 
+typedef struct s_executor {
+    int stdin_pipe;
+    int stdout_pipe;
+    int pipe_read;
+    int pipe_write;
+    char *redirect_in;
+    char *dredirect_in;
+    char *redirect_out;
+    char **env;
+} t_executor;
+
 int         error(char *msg, int ret);
 void        free_tab(char **tab);
 t_token     *t_access(t_list *lst);
@@ -91,6 +102,6 @@ void        ast_delete_node(t_node *node);
 void        ast_set_data(t_node *node, char *data);
 void        ast_set_type(t_node *node, int type);
 void        ast_attach_branch(t_node *root, t_node *left, t_node *right);
-
+void         execute_ast_tree(t_node *exec, char **env);
 
 #endif

@@ -1,6 +1,6 @@
 NAME = minishell
 CC = clang
-SRC = srcs/main.c srcs/lexer.c srcs/utils.c srcs/parser.c srcs/ast_tree.c
+SRC = srcs/main.c srcs/lexer.c srcs/utils.c srcs/parser.c srcs/ast_tree.c srcs/execute.c
 CFLAGS = -g3
 OBJ = $(SRC:.c=.o)
 
