@@ -29,13 +29,13 @@
 **          |       <builtin> '>>' <filename>       build_command_3
 **          |       <builtin>                       build_command_4
 **          
-** filemame ::=     <filename> '>' <filename>
-**          |       <filename> '>>' <filename>
-**          |       <token>
+** filemame ::=     <filename> '>' <filename>       build_filename_1
+**          |       <filename> '>>' <filename>      build_filename_2
+**          |       <token>                         build_filename_3
 **
 **  builtin ::==    <pathname> <args>               build_builtin_1
             |       <pathname>                      build_builtin_2
-
+**
 **  args    ::=     <arg> <args>                    build_arg_tree_1                    
             |       EMPTY                           build_arg_tree_2
 */
@@ -59,9 +59,9 @@ typedef enum e_node_type {
     NODE_REDIRECT_IN,
     NODE_REDIRECT_OUT,
     NODE_REDIRECT_DIN,
+    NODE_PATHNAME,
     NODE_PIPE,
     NODE_LINE
-
 } t_node_type;
 
 typedef struct s_token {
@@ -87,9 +87,6 @@ typedef struct s_executor {
     int stdout_pipe;
     int pipe_read;
     int pipe_write;
-    char *redirect_in;
-    char *dredirect_in;
-    char *redirect_out;
     char **env;
 } t_executor;
 

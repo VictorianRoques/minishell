@@ -7,6 +7,7 @@ t_node      *build_builtin_1(t_list **token);
 t_node      *build_filename(t_list **token);
 t_node      *build_filename_1(t_list **token);
 t_node      *build_filename_2(t_list **token);
+t_node      *build_filename_3(t_list **token);
 t_node      *build_command(t_list **token);
 t_node      *build_command_1(t_list **token);
 t_node      *build_command_2(t_list **token);
@@ -219,9 +220,10 @@ t_node      *build_command_2(t_list **token)
 
 t_node      *build_command_1(t_list **token)
 {
-    t_node *result;
-    t_node *builtin;
-    char *filename;
+    t_node  *result;
+    t_node  *builtin;
+    t_node  *filename;
+    char *pathname;
 
    if ((builtin = build_builtin(token)) == NULL)
        return (NULL);
@@ -230,31 +232,69 @@ t_node      *build_command_1(t_list **token)
         ast_delete_node(builtin);
         return (NULL);
     }
-    if (!check(WORD, &filename, token))
+    if (!check(WORD, &pathname, token))
     {
         ast_delete_node(builtin);
         return (NULL);
     }
     result = malloc(sizeof(*result));
-    ast_set_data(result, filename);
+    ast_set_data(result, pathname);
     ast_set_type(result, NODE_REDIRECT_IN);
-    ast_attach_branch(result, builtin, NULL);
+    ast_attach_branch(result, builtin, build_filename(token));
     return (result);
 }
 
-// t_node      *build_filename(t_list **token)
-// {
-//     t_list *save;
-//     t_node *node;
+t_node      *build_filename(t_list **token)
+{
+    t_list *save;
+    t_node *node;
 
-//     save = token;
-//     if ((*token = save, node = build_filename_1(token)) != NULL)
-//         return (node);
-//     if ((*token = save, node = build_filename_2(token)) != NULL)
-//         return (node);
-//     if ((*token = save, node = build_filename_3(token)) != NULL)
-//         return (node);
-// }
+    save = *token;
+    if ((*token = save, node = build_filename_1(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_filename_2(token)) != NULL)
+        return (node);
+    if ((*token = save, node = build_filename_3(token)) != NULL)
+        return (node);
+    return NULL;
+}
+
+t_node      *build_filename_1(t_list **token)
+{
+    t_node *result;
+    char *pathname;
+
+    if (!check(GREATER, NULL, token))
+        return (NULL);
+    if (!check(WORD, &pathname, token))
+        return (NULL);
+    result = malloc(sizeof(*result));
+    ast_set_data(result, pathname);
+    ast_set_type(result, NODE_REDIRECT_IN);
+    ast_attach_branch(result, NULL, build_filename(token));
+    return result;
+}
+
+t_node      *build_filename_2(t_list **token)
+{
+    t_node *result;
+    char *pathname;
+
+    if (!check(DGREATER, NULL, token))
+        return (NULL);
+    if (!check(WORD,&pathname, token))
+        return (NULL);
+    result = malloc(sizeof(*result));
+    ast_set_data(result, pathname);
+    ast_set_type(result, NODE_REDIRECT_DIN);
+    ast_attach_branch(result, NULL, build_filename(token));
+    return result;
+}
+
+t_node          *build_filename_3(t_list **token)
+{
+  return (NULL);
+}
 
 t_node        *build_builtin(t_list **token)
 {

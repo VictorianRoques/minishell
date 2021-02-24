@@ -39,7 +39,7 @@ int     main(int ac, char **argv, char **env)
     t_node *exec_tree;
 
     ft_bzero(&lexer, sizeof(t_lexer));
-    if (build_lexer("ls -la > papa\n", &lexer) == -1)
+    if (build_lexer(argv[1], &lexer) == -1)
     {
         free_lexer(lexer.tokens);
         return (-1);

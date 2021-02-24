@@ -45,27 +45,6 @@ int     execute(t_node *cmd, t_executor *exec)
     int statut;
     path = search_path(node->data);
     args = create_cmd_table(node);
-    // redirections
-    if (exec->redirect_in)
-    {
-        
-        fdout = open(exec->redirect_in, O_RDWR | O_CREAT);
-        dup2(fdout, 1);
-        close(fdout);
-    }
-    else if (exec->redirect_out)
-    {
-        fdin = open(exec->redirect_out, O_RDONLY);
-        dup2(fdin, 0);
-        close(fdin);
-    }
-    else if (exec->dredirect_in)
-    {
-        fdout = open(exec->dredirect_in, O_RDWR | O_CREAT | O_APPEND);
-        dup2(fdout, 1);
-        close(fdout);
-    }
-    //end redirection
     if ((pid = fork()) < 0)
         return (-1);
     if (pid == 0)
@@ -82,24 +61,43 @@ void        execute_builtin(t_node *builtin, t_executor *exec)
     execute(builtin, exec);
 }
 
+void    handle_redirection(t_node *redirect)
+{
+    int fdout;
+    int fdin;
+
+    if (!redirect)
+        return;
+    if (redirect->type == NODE_REDIRECT_IN)
+    {
+        fdout = open(redirect->data, O_RDWR | O_CREAT);
+        dup2(fdout, 1);
+        close(fdout);
+    }
+    else if (redirect->type == NODE_REDIRECT_OUT)
+    {
+        fdin = open(redirect->data, O_RDONLY);
+        dup2(fdin, 0);
+        close(fdin);
+    }
+    else if (redirect->type == NODE_REDIRECT_DIN)
+    {
+        fdout = open(redirect->data, O_RDWR | O_CREAT | O_APPEND);
+        dup2(fdout, 1);
+        close(fdout);
+    }
+    handle_redirection(redirect->right);
+}
+
 void        execute_command(t_node *command, t_executor *exec)
 {
     //initialize to NULL redirections
     if (!command)
         return;
-    if (command->type == NODE_REDIRECT_IN)
+    if (command->type == NODE_REDIRECT_IN || command->type == NODE_REDIRECT_OUT
+        || command->type == NODE_REDIRECT_DIN)
     {
-        exec->redirect_in = command->data;
-        execute_builtin(command->left, exec);
-    }
-    else if (command->type == NODE_REDIRECT_OUT)
-    {
-        exec->redirect_out = command->data;
-        execute_builtin(command->left, exec);
-    }
-    else if (command->type == NODE_REDIRECT_DIN)
-    {
-        exec->dredirect_in = command->data;
+        handle_redirection(command);
         execute_builtin(command->left, exec);
     }
     else
@@ -112,6 +110,7 @@ void        execute_job(t_node *job, t_executor *exec)
         return;
     if (job->type == NODE_PIPE)
     {
+        // connecter les pipes
         execute_command(job->left, exec);
         execute_job(job->right, exec);
     }
