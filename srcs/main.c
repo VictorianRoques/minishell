@@ -44,7 +44,7 @@ int     main(int ac, char **argv, char **env)
         free_lexer(lexer.tokens);
         return (-1);
     }
-    print_lst_tokens(&lexer);
+    // print_lst_tokens(&lexer);
     if (lexer.nb_tokens == 0 || parse(&lexer, &exec_tree) == -1)
     {
         free_lexer(lexer.tokens);

@@ -362,7 +362,7 @@ int       parse(t_lexer *lexer, t_node **exec_tree)
         printf("Syntax Error near: %s\n", t_access(tokens)->data);
         return (-1);
     }
-    printf("PARSING\n");
-    print_preorder(*exec_tree);
+    // printf("PARSING\n");
+    // print_preorder(*exec_tree);
     return (0);
 } 

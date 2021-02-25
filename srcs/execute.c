@@ -4,7 +4,10 @@ char    *search_path(char *cmd_name)
 {
     char *path;
 
-    path = ft_strjoin("/bin/", cmd_name);
+    if (!ft_strncmp("ls", cmd_name, 2))
+        path = ft_strjoin("/bin/", cmd_name);
+    else
+        path = ft_strjoin("/usr/bin/", cmd_name);
     return (path);
 }
 
@@ -33,6 +36,24 @@ char        **create_cmd_table(t_node *root)
     args[nbcmd] = NULL;
     return (args);
 }
+void    handle_piping(t_executor *exec)
+{
+    if (exec->stdin_pipe && exec->stdout_pipe)
+        {
+            dup2(exec->pipe_read, 0);
+            dup2(exec->pipe_write, 1);
+        }
+        else if (exec->stdout_pipe)
+        {
+            close(exec->pipe_read);
+            dup2(exec->pipe_write, 1);
+        }
+        else if (exec->stdin_pipe)
+        {
+            close(exec->pipe_write);
+            dup2(exec->pipe_read, 0);
+        }
+}
 
 int     execute(t_node *cmd, t_executor *exec)
 {
@@ -40,19 +61,19 @@ int     execute(t_node *cmd, t_executor *exec)
     t_node *node = cmd;
     char *path;
     char **args;
-    int fdout;
-    int fdin;
-    int statut;
-    path = search_path(node->data);
-    args = create_cmd_table(node);
+
     if ((pid = fork()) < 0)
         return (-1);
     if (pid == 0)
     {
-        execve(path, args, exec->env);
+        handle_piping(exec);
+        path = search_path(node->data);
+        args = create_cmd_table(node);
+        if ((execve(path, args, exec->env)) == -1)
+            perror("execve");
+        free(path);
+        free_tab(args);
     }
-    free(path);
-    free_tab(args);
     return (1);
 }
 
@@ -61,32 +82,34 @@ void        execute_builtin(t_node *builtin, t_executor *exec)
     execute(builtin, exec);
 }
 
-void    handle_redirection(t_node *redirect)
+void    handle_redirection(t_node *node_redirect)
 {
     int fdout;
     int fdin;
+    t_node *redirect = node_redirect;
 
-    if (!redirect)
-        return;
-    if (redirect->type == NODE_REDIRECT_IN)
+    while (redirect)
     {
-        fdout = open(redirect->data, O_RDWR | O_CREAT);
-        dup2(fdout, 1);
-        close(fdout);
+        if (redirect->type == NODE_REDIRECT_IN)
+        {
+            fdout = open(redirect->data, O_RDWR | O_CREAT);
+            dup2(fdout, 1);
+            close(fdout);
+        }
+        else if (redirect->type == NODE_REDIRECT_OUT)
+        {
+            fdin = open(redirect->data, O_RDONLY);
+            dup2(fdin, 0);
+            close(fdin);
+        }
+        else if (redirect->type == NODE_REDIRECT_DIN)
+        {
+            fdout = open(redirect->data, O_RDWR | O_CREAT | O_APPEND);
+            dup2(fdout, 1);
+            close(fdout);
+        }
+        redirect = redirect->right;
     }
-    else if (redirect->type == NODE_REDIRECT_OUT)
-    {
-        fdin = open(redirect->data, O_RDONLY);
-        dup2(fdin, 0);
-        close(fdin);
-    }
-    else if (redirect->type == NODE_REDIRECT_DIN)
-    {
-        fdout = open(redirect->data, O_RDWR | O_CREAT | O_APPEND);
-        dup2(fdout, 1);
-        close(fdout);
-    }
-    handle_redirection(redirect->right);
 }
 
 void        execute_command(t_node *command, t_executor *exec)
@@ -104,15 +127,50 @@ void        execute_command(t_node *command, t_executor *exec)
         execute_builtin(command, exec);
 }
 
+void        set_pipe_bool(int stdin_pipe, int stdout_pipe, t_executor *exec)
+{
+    exec->stdin_pipe = stdin_pipe;
+    exec->stdout_pipe = stdout_pipe;
+}
+
+void        execute_pipe(t_node *node_pipe, t_executor *exec)
+{
+    int fd[2];
+    pipe(fd);
+
+    exec->pipe_read = fd[0];
+    exec->pipe_write = fd[1];
+    set_pipe_bool(0, 1, exec);
+    execute_command(node_pipe->left, exec);
+
+    t_node *job = node_pipe->right;
+    while (job && job->type == NODE_PIPE)
+    {
+        exec->pipe_read = fd[0];
+        exec->pipe_write = fd[1];
+        set_pipe_bool(1, 1, exec);
+        close(exec->pipe_write);
+        pipe(fd);
+        exec->pipe_write = fd[1];
+        execute_command(job->left, exec);
+        close(exec->pipe_read);
+        exec->pipe_read= fd[0];
+        job = job->right;
+    }
+    exec->pipe_read = fd[0];
+    exec->pipe_write = fd[1];
+    set_pipe_bool(1, 0,exec);
+    execute_command(job, exec);
+    close(exec->pipe_read);
+}
+
 void        execute_job(t_node *job, t_executor *exec)
 {
     if (!job)
         return;
     if (job->type == NODE_PIPE)
     {
-        // connecter les pipes
-        execute_command(job->left, exec);
-        execute_job(job->right, exec);
+        execute_pipe(job, exec);
     }
     else
         execute_command(job, exec);

@@ -59,7 +59,6 @@ typedef enum e_node_type {
     NODE_REDIRECT_IN,
     NODE_REDIRECT_OUT,
     NODE_REDIRECT_DIN,
-    NODE_PATHNAME,
     NODE_PIPE,
     NODE_LINE
 } t_node_type;
@@ -87,6 +86,9 @@ typedef struct s_executor {
     int stdout_pipe;
     int pipe_read;
     int pipe_write;
+    char *redirect_in;
+    char *redirect_out;
+    char *redirect_din;
     char **env;
 } t_executor;
 
