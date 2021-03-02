@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/02 16:14:51 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/02 18:21:48 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/02 18:48:08 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ void    handle_redirection(t_node *node_redirect)
     int fdout;
     int fdin;
     t_node *redirect = node_redirect;
-
+    
     while (redirect)
     {
         if (redirect->type == NODE_REDIRECT_IN)
