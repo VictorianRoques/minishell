@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/03/02 16:14:54 by viroques          #+#    #+#             */
+/*   Updated: 2021/03/02 17:18:14 by viroques         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/minishell.h"
 
 
@@ -48,7 +60,7 @@ int     main(int ac, char **argv, char **env)
         return (-1);
     }
     free_tab(tab);
-    print_lst_tokens(&lexer);
+    // print_lst_tokens(&lexer);
     if (lexer.nb_tokens == 0 || parse(&lexer, &exec_tree) == -1)
     {
         free_lexer(lexer.tokens);

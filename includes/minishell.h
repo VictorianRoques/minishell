@@ -89,6 +89,8 @@ typedef struct s_executor {
     char *redirect_out;
     char *redirect_din;
     char **env;
+    char **dirs_path;
+    char *path;
 } t_executor;
 
 int         error(char *msg, int ret);

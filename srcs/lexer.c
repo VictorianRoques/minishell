@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lexer.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/03/02 16:14:45 by viroques          #+#    #+#             */
+/*   Updated: 2021/03/02 16:15:24 by viroques         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/minishell.h"
 
 static int         create_word_token(char *str, t_lexer *lexer)
@@ -115,8 +127,8 @@ int     build_lexer(char **tab, t_lexer *lexer)
             if (tab[i][j] == '|')
             {
                 if (tab[i + 1] == NULL){
-                    return (error("Error missing instruction after pipe\n", -1))
-                    // CALL MULTILIGNE AND WAIT FOR USER INPUT
+                    return (error("Error missing instruction after pipe\n", -1));
+                    // CALL MULTILIGNE INSTEAD AND WAIT FOR USER INPUT
                 }
                 create_operator_token("|", PIPE, lexer);
             }
