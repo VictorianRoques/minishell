@@ -6,6 +6,17 @@ int     error(char *msg, int ret)
     return (ret);
 }
 
+int     error_parsing(char *data)
+{
+    char *error;
+
+    error = ft_strjoin("Syntax error near: ", data);
+    write(1, error, ft_strlen(error));
+    write(1, "\n", 1);
+    free(error);
+    return (-1);
+}
+
 void        free_tab(char **tab)
 {
     int i;

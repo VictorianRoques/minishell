@@ -1,4 +1,6 @@
 #include "../includes/minishell.h"
+#include <sys/types.h>
+#include <dirent.h>
 
 char    *search_path(char *cmd_name)
 {
@@ -127,28 +129,26 @@ void        execute_command(t_node *command, t_executor *exec)
         execute_builtin(command, exec);
 }
 
-void        set_pipe_bool(int stdin_pipe, int stdout_pipe, t_executor *exec)
+void        set_pipe_bool(int stdin_pipe, int stdout_pipe, int *fd,t_executor *exec)
 {
     exec->stdin_pipe = stdin_pipe;
     exec->stdout_pipe = stdout_pipe;
+    exec->pipe_read = fd[0];
+    exec->pipe_write = fd[1];
 }
 
 void        execute_pipe(t_node *node_pipe, t_executor *exec)
 {
     int fd[2];
+    t_node *job;
+    
     pipe(fd);
-
-    exec->pipe_read = fd[0];
-    exec->pipe_write = fd[1];
-    set_pipe_bool(0, 1, exec);
+    set_pipe_bool(0, 1, fd, exec);
     execute_command(node_pipe->left, exec);
-
-    t_node *job = node_pipe->right;
+    job = node_pipe->right;
     while (job && job->type == NODE_PIPE)
     {
-        exec->pipe_read = fd[0];
-        exec->pipe_write = fd[1];
-        set_pipe_bool(1, 1, exec);
+        set_pipe_bool(1, 1, fd, exec);
         close(exec->pipe_write);
         pipe(fd);
         exec->pipe_write = fd[1];
@@ -157,9 +157,7 @@ void        execute_pipe(t_node *node_pipe, t_executor *exec)
         exec->pipe_read= fd[0];
         job = job->right;
     }
-    exec->pipe_read = fd[0];
-    exec->pipe_write = fd[1];
-    set_pipe_bool(1, 0,exec);
+    set_pipe_bool(1, 0, fd, exec);
     execute_command(job, exec);
     close(exec->pipe_read);
 }

@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/minishell",
-            "args": [],
+            "args": ["ls -la|wc -c"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

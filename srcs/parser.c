@@ -51,11 +51,11 @@ t_node      *build_line(t_list **token)
     t_list *save;
 
     save = *token;
-    if ((*token = save, node = build_line_1(token)) != NULL)
+    if ((*token = save) && (node = build_line_1(token)))
         return (node);
-    if ((*token = save, node = build_line_2(token)) != NULL)
+    if ((*token = save) && (node = build_line_2(token)))
         return (node);
-    if ((*token = save, node = build_line_3(token)) != NULL)
+    if ((*token = save) && (node = build_line_3(token)))
         return (node);
     return (NULL);
 }
@@ -109,9 +109,9 @@ t_node      *build_job(t_list **token)
     t_list *save;
 
     save = *token;
-    if ((*token = save, node = build_job_1(token)) != NULL)
+    if ((*token = save) && (node = build_job_1(token)))
         return (node);
-    if ((*token = save, node = build_job_2(token)) != NULL)
+    if ((*token = save) && (node = build_job_2(token)))
         return (node);
     return (NULL);
 }
@@ -152,13 +152,13 @@ t_node      *build_command(t_list **token)
     t_list *save;
 
     save = *token;
-    if ((*token = save, node = build_command_1(token)) != NULL)
+    if ((*token = save) && (node = build_command_1(token)))
         return (node);
-    if ((*token = save, node = build_command_2(token)) != NULL)
+    if ((*token = save) && (node = build_command_2(token)))
         return (node);
-    if ((*token = save, node = build_command_3(token)) != NULL)
+    if ((*token = save) && (node = build_command_3(token)))
         return (node);
-    if ((*token = save, node = build_command_4(token)) != NULL)
+    if ((*token = save) && (node = build_command_4(token)))
         return (node);
     return (NULL);
 }
@@ -250,11 +250,11 @@ t_node      *build_filename(t_list **token)
     t_node *node;
 
     save = *token;
-    if ((*token = save, node = build_filename_1(token)) != NULL)
+    if ((*token = save) && (node = build_filename_1(token)))
         return (node);
-    if ((*token = save, node = build_filename_2(token)) != NULL)
+    if ((*token = save) && (node = build_filename_2(token)))
         return (node);
-    if ((*token = save, node = build_filename_3(token)) != NULL)
+    if ((*token = save) && (node = build_filename_3(token)))
         return (node);
     return NULL;
 }
@@ -323,9 +323,9 @@ t_node        *build_args(t_list **token)
     t_list *save;
 
     save = *token;
-    if ((*token = save, node = build_arg_1(token)) != NULL)
+    if ((*token = save) && (node = build_arg_1(token)))
         return node;
-    if ((*token = save, node = build_arg_2()) != NULL)
+    if ((*token = save) && (node = build_arg_2()))
         return node;
     return NULL;
 }
@@ -357,11 +357,8 @@ int       parse(t_lexer *lexer, t_node **exec_tree)
 
     tokens = lexer->tokens;
     *exec_tree = build_line(&(tokens));
-     if (tokens != NULL && t_access(tokens)->type != NEWLINE)
-    {
-        printf("Syntax Error near: %s\n", t_access(tokens)->data);
-        return (-1);
-    }
+     if (tokens != NULL)
+        return (error_parsing(t_access(tokens)->data));
     // printf("PARSING\n");
     // print_preorder(*exec_tree);
     return (0);

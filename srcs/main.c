@@ -36,15 +36,19 @@ void        free_lexer(t_list *lst_tokens)
 int     main(int ac, char **argv, char **env)
 {
     t_lexer lexer;
-    t_node *exec_tree;
+    t_node  *exec_tree;
+    char    **tab;
 
     ft_bzero(&lexer, sizeof(t_lexer));
-    if (build_lexer(argv[1], &lexer) == -1)
+    tab = ft_split(argv[1], ' ');
+    if (build_lexer(tab, &lexer) == -1)
     {
+        free_tab(tab);
         free_lexer(lexer.tokens);
         return (-1);
     }
-    // print_lst_tokens(&lexer);
+    free_tab(tab);
+    print_lst_tokens(&lexer);
     if (lexer.nb_tokens == 0 || parse(&lexer, &exec_tree) == -1)
     {
         free_lexer(lexer.tokens);
