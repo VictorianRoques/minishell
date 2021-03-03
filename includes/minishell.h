@@ -5,9 +5,11 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <sys/stat.h>
+# include <dirent.h>
 # include <fcntl.h>
 # include <signal.h>
 # include "../libft/libft.h"
+# include <sys/errno.h>
 
 /*
 ** Recursive Descent Parsing algorithm for a subset of bash grammar
@@ -48,8 +50,8 @@ typedef enum e_token_type{
 	GREATER,
     DGREATER,
 	LESSER,
+    NEWLINE,
     WORD,
-    NEWLINE
 } t_token_type;
 
 typedef enum e_node_type {
@@ -93,15 +95,41 @@ typedef struct s_executor {
     char *path;
 } t_executor;
 
+
+//utils
 int         error(char *msg, int ret);
 int         error_parsing(char *data);
 void        free_tab(char **tab);
 t_token     *t_access(t_list *lst);
+
+//lexer
 int         build_lexer(char **tab, t_lexer *lexer);
+int         create_operator_token(char *data, int type, t_lexer *lexer);
+int         create_word_token(char *str, t_lexer *lexer);
+//parsing function
 int         parse(t_lexer *lexer, t_node **exec_tree);
+t_node      *build_line(t_list **token);
+t_node      *build_job(t_list **token);
+t_node      *build_command(t_list **token);
+t_node      *build_filename(t_list **token);
+t_node      *build_builtin(t_list **token);
+t_node      *build_args(t_list **token);
+int         check(int tok_type, char** bufferptr, t_list **token);
+
+//execute function
+int         execute_bin(t_node *cmd, t_executor *exec);
+void        handle_redirection(t_node *node_redirect);
+void        handle_piping(t_executor *exec);
+void        set_pipe_bool(int stdin_pipe, int stdout_pipe, int *fd ,t_executor *exec);
+char        *search_path(char *cmd_name, char **directories);
+char        **get_directories_path(char **env);
+void        execute_ast_tree(t_node *exec_tree, char **env);
+
+//ast_tree
 void        ast_delete_node(t_node *node);
 void        ast_set_data(t_node *node, char *data);
 void        ast_set_type(t_node *node, int type);
 void        ast_attach_branch(t_node *root, t_node *left, t_node *right);
-void         execute_ast_tree(t_node *exec, char **env);
+void        execute_ast_tree(t_node *exec, char **env);
+
 #endif

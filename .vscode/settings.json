@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "minishell.h": "c",
+        "string": "c",
+        "iosfwd": "c",
+        "errno.h": "c"
+    }
+}

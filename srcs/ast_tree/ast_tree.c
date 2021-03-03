@@ -6,11 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/02 16:15:30 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/02 16:15:35 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/03 16:52:45 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
 void        ast_attach_branch(t_node *root, t_node *left, t_node *right)
 {

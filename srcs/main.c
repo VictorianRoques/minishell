@@ -6,12 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/02 16:14:54 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/02 17:18:14 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/03 19:43:09 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
 
 void        print_lst_tokens(t_lexer *lexer)
 {
@@ -30,10 +29,11 @@ void        print_lst_tokens(t_lexer *lexer)
 
 void        free_lexer(t_list *lst_tokens)
 {
-    t_list *lst = lst_tokens;
-    t_list *tmp;
+    t_list  *lst;
+    t_list  *tmp;
     t_token *tok;
 
+    lst = lst_tokens;
     while (lst)
     {
         tok = lst->content;
@@ -51,7 +51,6 @@ int     main(int ac, char **argv, char **env)
     t_node  *exec_tree;
     char    **tab;
 
-    ft_bzero(&lexer, sizeof(t_lexer));
     tab = ft_split(argv[1], ' ');
     if (build_lexer(tab, &lexer) == -1)
     {
@@ -66,7 +65,8 @@ int     main(int ac, char **argv, char **env)
         free_lexer(lexer.tokens);
         return (-1);
     }
-    execute_ast_tree(exec_tree, env);
     free_lexer(lexer.tokens);
-    return(0);
+    execute_ast_tree(exec_tree, env);
+    ast_delete_node(exec_tree);
+    return (0);
 }
