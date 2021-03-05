@@ -6,35 +6,35 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 16:15:19 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 16:20:14 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 12:04:32 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
-void    handle_piping(t_executor *exec)
+void    handle_piping(t_flux *flux)
 {
-    if (exec->stdin_pipe && exec->stdout_pipe)
+    if (flux->stdin_pipe && flux->stdout_pipe)
         {
-            dup2(exec->pipe_read, 0);
-            dup2(exec->pipe_write, 1);
+            dup2(flux->pipe_read, 0);
+            dup2(flux->pipe_write, 1);
         }
-        else if (exec->stdout_pipe)
+        else if (flux->stdout_pipe)
         {
-            close(exec->pipe_read);
-            dup2(exec->pipe_write, 1);
+            close(flux->pipe_read);
+            dup2(flux->pipe_write, 1);
         }
-        else if (exec->stdin_pipe)
+        else if (flux->stdin_pipe)
         {
-            close(exec->pipe_write);
-            dup2(exec->pipe_read, 0);
+            close(flux->pipe_write);
+            dup2(flux->pipe_read, 0);
         }
 }
 
-void        set_pipe_bool(int stdin_pipe, int stdout_pipe, int *fd,t_executor *exec)
+void        set_pipe_bool(int stdin_pipe, int stdout_pipe, int *fd , t_flux *flux)
 {
-    exec->stdin_pipe = stdin_pipe;
-    exec->stdout_pipe = stdout_pipe;
-    exec->pipe_read = fd[0];
-    exec->pipe_write = fd[1];
+    flux->stdin_pipe = stdin_pipe;
+    flux->stdout_pipe = stdout_pipe;
+    flux->pipe_read = fd[0];
+    flux->pipe_write = fd[1];
 }

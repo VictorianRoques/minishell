@@ -6,11 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 16:26:57 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 16:28:08 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 12:35:10 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
 static t_node      *build_command_4(t_list **token)
 {
@@ -19,10 +19,10 @@ static t_node      *build_command_4(t_list **token)
 
 static t_node      *build_command_3(t_list **token)
 {
-    t_node *result;
-    t_node *builtin;
-    char *filename;
-
+    t_node  *result;
+    t_node  *builtin;
+    char    *filename;
+    
    if ((builtin = build_builtin(token)) == NULL)
        return (NULL);
     if (!check(DGREATER, NULL, token))
@@ -35,18 +35,19 @@ static t_node      *build_command_3(t_list **token)
         ast_delete_node(builtin);
         return (NULL);
     }
-    result = malloc(sizeof(*result));
+    if (!(result = malloc(sizeof(t_node))))
+        return (NULL);
     ast_set_data(result, filename);
-    ast_set_type(result, NODE_REDIRECT_DIN);
-    ast_attach_branch(result, builtin, NULL);
+    ast_set_type(result, NODE_REDIRECT_OVER);
+    ast_attach_branch(result, builtin, build_filename(token));
     return (result);
 }
 
 static t_node      *build_command_2(t_list **token)
 {
-    t_node *result;
-    t_node *builtin;
-    char *filename;
+    t_node  *result;
+    t_node  *builtin;
+    char    *filename;
 
    if ((builtin = build_builtin(token)) == NULL)
        return (NULL);
@@ -60,10 +61,11 @@ static t_node      *build_command_2(t_list **token)
         ast_delete_node(builtin);
         return (NULL);
     }
-    result = malloc(sizeof(*result));
+    if (!(result = malloc(sizeof(t_node))))
+        return (NULL);
     ast_set_data(result, filename);
     ast_set_type(result, NODE_REDIRECT_OUT);
-    ast_attach_branch(result, builtin, NULL);
+    ast_attach_branch(result, builtin, build_filename(token));
     return (result);
 }
 
@@ -71,8 +73,7 @@ static t_node      *build_command_1(t_list **token)
 {
     t_node  *result;
     t_node  *builtin;
-    t_node  *filename;
-    char *pathname;
+    char    *pathname;
 
    if ((builtin = build_builtin(token)) == NULL)
        return (NULL);
@@ -86,7 +87,8 @@ static t_node      *build_command_1(t_list **token)
         ast_delete_node(builtin);
         return (NULL);
     }
-    result = malloc(sizeof(*result));
+    if (!(result = malloc(sizeof(t_node))))
+        return (NULL);
     ast_set_data(result, pathname);
     ast_set_type(result, NODE_REDIRECT_IN);
     ast_attach_branch(result, builtin, build_filename(token));

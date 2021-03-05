@@ -6,17 +6,17 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 16:18:41 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 19:32:50 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 20:26:01 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
 char        **create_cmd_table(t_node *root)
 {
-    t_node *node;
-    char **args;
-    int nbcmd;
+    t_node  *node;
+    char    **args;
+    int     nbcmd;
 
     nbcmd = 0;
     node = root;
@@ -25,7 +25,7 @@ char        **create_cmd_table(t_node *root)
         nbcmd++;
         node = node->left;
     }
-    args = malloc(sizeof(char *) * nbcmd + 1);
+    args = malloc(sizeof(char *) * (nbcmd + 1));
     node = root;
     nbcmd = 0;
     while (node)
@@ -38,21 +38,27 @@ char        **create_cmd_table(t_node *root)
     return (args);
 }
 
-int     execute_bin(t_node *cmd, t_executor *exec)
+int     execute_bin(t_node *cmd, t_executor *exec, t_flux *flux)
 {
-    pid_t pid;
     char **args;
     char *path;
+    pid_t pid;
     
-    path = search_path(cmd->data, exec->dirs_path);
     if ((pid = fork()) < 0)
         return (-1);
     if (pid == 0)
-    {
-        handle_piping(exec);
+    {   
+        if (cmd->data[0] == '/')
+            path = cmd->data;
+        else
+        path = search_path(cmd->data, exec->directories);
         args = create_cmd_table(cmd);
+        handle_piping(flux);
         if ((execve(path, args, exec->env)) == -1)
+        {
             write(2, strerror(errno), ft_strlen(strerror(errno)));
+            write(2, "\n", 1);
+        }
         free_tab(args);
     }
     return (1);

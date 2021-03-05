@@ -6,11 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 16:30:47 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 17:03:13 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 12:22:50 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
 static t_node          *build_builtin_1(t_list **token)
 {
@@ -21,7 +21,8 @@ static t_node          *build_builtin_1(t_list **token)
     if (!check(WORD, &pathname, token))
         return (NULL);
     args = build_args(token);
-    result = malloc(sizeof(*result));
+    if (!(result = malloc(sizeof(t_node))))
+        return (NULL);
     ast_set_data(result, pathname);
     ast_set_type(result, NODE_BUILTIN);
     ast_attach_branch(result, args, NULL);

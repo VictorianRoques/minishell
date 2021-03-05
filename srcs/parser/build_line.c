@@ -6,11 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 16:21:26 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 16:23:22 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 12:25:18 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
 static t_node      *build_line_1(t_list **token)
 {
@@ -30,7 +30,8 @@ static t_node      *build_line_1(t_list **token)
         ast_delete_node(job);
         return (NULL);
     }
-    result = malloc(sizeof(*result));
+    if (!(result = malloc(sizeof(*result))))
+        return NULL;
     ast_set_type(result, NODE_LINE);
     ast_set_data(result, NULL);
     ast_attach_branch(result, job, line);

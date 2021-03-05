@@ -6,11 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/02 16:15:14 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 16:58:23 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 10:47:55 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
 int     error(char *msg, int ret)
 {

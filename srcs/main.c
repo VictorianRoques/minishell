@@ -6,13 +6,13 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/02 16:14:54 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 19:43:09 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 20:15:32 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../include/minishell.h"
 
-void        print_lst_tokens(t_lexer *lexer)
+void print_lst_tokens(t_lexer *lexer)
 {
     t_list *toto;
 
@@ -27,10 +27,10 @@ void        print_lst_tokens(t_lexer *lexer)
     printf("nb=%d\n", lexer->nb_tokens);
 }
 
-void        free_lexer(t_list *lst_tokens)
+void free_lexer(t_list *lst_tokens)
 {
-    t_list  *lst;
-    t_list  *tmp;
+    t_list *lst;
+    t_list *tmp;
     t_token *tok;
 
     lst = lst_tokens;
@@ -45,28 +45,39 @@ void        free_lexer(t_list *lst_tokens)
     }
 }
 
-int     main(int ac, char **argv, char **env)
+int main(int ac, char **argv, char **env)
 {
-    t_lexer lexer;
-    t_node  *exec_tree;
-    char    **tab;
+    char **tab;
 
-    tab = ft_split(argv[1], ' ');
-    if (build_lexer(tab, &lexer) == -1)
+    (void)ac;
+    (void)argv;
+    char *line;
+    while ((get_next_line(0, &line)))
     {
+        t_lexer lexer;
+        t_node *exec_tree;
+        lexer.tokens = NULL;
+        lexer.nb_tokens = 0;
+        tab = ft_split(line, ' ');
+        last_pid = 0;
+        if (build_lexer(tab, &lexer) == -1)
+        {
+            free_tab(tab);
+            free_lexer(lexer.tokens);
+            return (-1);
+        }
         free_tab(tab);
+        // print_lst_tokens(&lexer);
+        if (lexer.nb_tokens == 0 || parse(&lexer, &exec_tree) == -1)
+        {
+            free_lexer(lexer.tokens);
+            return (-1);
+        }
         free_lexer(lexer.tokens);
-        return (-1);
+        execute_ast_tree(exec_tree, env);
+        ast_delete_node(exec_tree);
+        free(line);
     }
-    free_tab(tab);
-    // print_lst_tokens(&lexer);
-    if (lexer.nb_tokens == 0 || parse(&lexer, &exec_tree) == -1)
-    {
-        free_lexer(lexer.tokens);
-        return (-1);
-    }
-    free_lexer(lexer.tokens);
-    execute_ast_tree(exec_tree, env);
-    ast_delete_node(exec_tree);
+
     return (0);
 }

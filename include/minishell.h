@@ -44,13 +44,12 @@
 
 typedef enum e_token_type{
 	PIPE,
-	QOUTE,
+	QUOTE,
 	DQUOTE,
 	SEMICOLON,  
 	GREATER,
     DGREATER,
 	LESSER,
-    NEWLINE,
     WORD,
 } t_token_type;
 
@@ -59,30 +58,37 @@ typedef enum e_node_type {
     NODE_BUILTIN,
     NODE_REDIRECT_IN,
     NODE_REDIRECT_OUT,
-    NODE_REDIRECT_DIN,
+    NODE_REDIRECT_OVER,
     NODE_PIPE,
     NODE_LINE
 } t_node_type;
 
 typedef struct s_token {
-    char *data;
-    t_token_type type;
+    char            *data;
+    t_token_type    type;
 } t_token;
 
 typedef struct s_lexer {
-    t_list *tokens;
+    t_list  *tokens;
     int     nb_tokens;
 } t_lexer;
 
 
 typedef struct s_node {
-    int type;
-    char *data;
-    struct s_node *left;
-    struct s_node *right;
-} t_node;
+    int             type;
+    char            *data;
+    struct s_node   *left;
+    struct s_node   *right;
+}   t_node;
 
 typedef struct s_executor {
+    char **env;
+    char **directories;
+    char *path;
+} t_executor;
+
+typedef struct s_flux
+{
     int stdin_pipe;
     int stdout_pipe;
     int pipe_read;
@@ -90,12 +96,9 @@ typedef struct s_executor {
     char *redirect_in;
     char *redirect_out;
     char *redirect_din;
-    char **env;
-    char **dirs_path;
-    char *path;
-} t_executor;
+}   t_flux;
 
-
+pid_t last_pid;
 //utils
 int         error(char *msg, int ret);
 int         error_parsing(char *data);
@@ -103,9 +106,10 @@ void        free_tab(char **tab);
 t_token     *t_access(t_list *lst);
 
 //lexer
+
 int         build_lexer(char **tab, t_lexer *lexer);
-int         create_operator_token(char *data, int type, t_lexer *lexer);
-int         create_word_token(char *str, t_lexer *lexer);
+int         create_token(char *data, t_token_type type, t_lexer *lexer);
+
 //parsing function
 int         parse(t_lexer *lexer, t_node **exec_tree);
 t_node      *build_line(t_list **token);
@@ -114,13 +118,13 @@ t_node      *build_command(t_list **token);
 t_node      *build_filename(t_list **token);
 t_node      *build_builtin(t_list **token);
 t_node      *build_args(t_list **token);
-int         check(int tok_type, char** bufferptr, t_list **token);
+int         check(t_token_type tok_type, char** bufferptr, t_list **token);
 
 //execute function
-int         execute_bin(t_node *cmd, t_executor *exec);
+int         execute_bin(t_node *cmd, t_executor *exec, t_flux *flux);
 void        handle_redirection(t_node *node_redirect);
-void        handle_piping(t_executor *exec);
-void        set_pipe_bool(int stdin_pipe, int stdout_pipe, int *fd ,t_executor *exec);
+void        handle_piping(t_flux *flux);
+void        set_pipe_bool(int stdin_pipe, int stdout_pipe, int *fd , t_flux *flux);
 char        *search_path(char *cmd_name, char **directories);
 char        **get_directories_path(char **env);
 void        execute_ast_tree(t_node *exec_tree, char **env);

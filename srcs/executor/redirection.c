@@ -6,11 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 16:17:01 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 17:07:07 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 19:26:32 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
 void    handle_redirection(t_node *node_redirect)
 {
@@ -33,7 +33,7 @@ void    handle_redirection(t_node *node_redirect)
             dup2(fdin, 0);
             close(fdin);
         }
-        else if (redirect->type == NODE_REDIRECT_DIN)
+        else if (redirect->type == NODE_REDIRECT_OVER)
         {
             fdout = open(redirect->data, O_RDWR | O_CREAT | O_APPEND);
             dup2(fdout, 1);

@@ -6,11 +6,11 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 16:12:43 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/03 17:13:17 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/04 12:05:06 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/minishell.h"
+#include "../../include/minishell.h"
 
 char        **get_directories_path(char **env)
 {
@@ -32,24 +32,22 @@ char        **get_directories_path(char **env)
 
 char    *search_path(char *cmd_name, char **directories)
 {
-    char    *path_filename;
-    DIR     *dir_stream;
+    DIR             *dir_stream;
     struct dirent   *dir; 
-    pid_t           pid;
-    char *path;
-    char *tmp;
-    int i;
-    i = 0; 
-
+    char            *path;
+    int             i;
+    
+    i = 0;
     while (directories[i])
     {
-        dir_stream = opendir(directories[i]);
-        while ((dir = readdir(dir_stream)))
+        if (!(dir_stream = opendir(directories[i])))
+            return (cmd_name);
+        while ((dir = readdir(dir_stream)) > 0)
         {
             if (ft_strncmp(dir->d_name, cmd_name, ft_strlen(dir->d_name)) == 0)
             {
-                tmp = ft_strjoin("/", cmd_name);
-                path = ft_strjoin(directories[i], tmp);
+                char *tmp = ft_strjoin(directories[i], "/");
+                path = ft_strjoin(tmp, cmd_name);
                 free(tmp);
                 closedir(dir_stream);
                 return (path);
