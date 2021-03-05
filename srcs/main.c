@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/02 16:14:54 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/04 20:15:32 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/05 11:52:59 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ int main(int ac, char **argv, char **env)
         lexer.tokens = NULL;
         lexer.nb_tokens = 0;
         tab = ft_split(line, ' ');
-        last_pid = 0;
         if (build_lexer(tab, &lexer) == -1)
         {
             free_tab(tab);

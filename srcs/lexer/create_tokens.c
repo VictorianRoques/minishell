@@ -6,7 +6,7 @@
 /*   By: viroques <viroques@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/03 17:15:30 by viroques          #+#    #+#             */
-/*   Updated: 2021/03/04 18:51:12 by viroques         ###   ########.fr       */
+/*   Updated: 2021/03/05 11:52:42 by viroques         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,10 +119,7 @@ int         create_token(char *data, t_token_type type, t_lexer *lexer)
     else if (type == DQUOTE || type == QUOTE)
     {
         if (!(len = len_quote(data, data[0])))
-        {
-            printf("len=%d quote= %c\n", len, data[0]);
             return (-1);
-        }
         token->data = get_data_quote(data, len, data[0]);
         token->type = WORD;
     }
