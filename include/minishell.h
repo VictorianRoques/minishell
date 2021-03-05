@@ -98,7 +98,6 @@ typedef struct s_flux
     char *redirect_din;
 }   t_flux;
 
-pid_t last_pid;
 //utils
 int         error(char *msg, int ret);
 int         error_parsing(char *data);
