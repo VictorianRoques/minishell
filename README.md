@@ -16,25 +16,11 @@ It will simply break the string input into a serie of tokens. They will be use f
 
 The shell language grammer is defined as follows in Backus–Naur form:
 
-  cmd_line::| <job> '||' <cmd_line>
-            | <job> '&&' <cmd_line>
-            | <job>
-  
-  job::     | <cmd> '|' <job>
-            | <cmd>
-  
-  cmd::     | <builtin> '>' <filename>
-            | <builtin> '<' <filename>
-            | <builtin> '>>' <filename>
-            | <builtin> '<<' <filename>
-  
-  builtin:: | <pathname> <args>
-  
-  args::    | <word> <args>
-            | <word>
+![Screenshot 2021-10-18 at 5 28 19 PM](https://user-images.githubusercontent.com/43143962/137762195-e2dcf51e-8e83-442d-8dff-fb13e1bc3c29.png)
  
  A recursive descent parser are use for build our execution tree (Abstract syntax tree).
  If the parser does not parse all the input string , that means that the input isn't part of the shell grammair, and it will stop where it doesn't found a match with his syntax.
+
  
  
 # Execution
